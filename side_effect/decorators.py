@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Any, Callable, Dict
 
 
-def get_top_level_diff(new: Any, old: Any) -> Dict[str, Any]:
+def _get_top_level_diff(new: Any, old: Any) -> Dict[str, Any]:
     if not isinstance(old, type(new)):
         raise ValueError("Trying to check diff of incompatible types.")
     new_attrs = vars(new)
@@ -21,7 +21,7 @@ def se_print(func: Callable) -> Callable:
         result = func(*args)
         print(f"Call of {func.__name__} on args {str(args)}")
         for arg, previous_state in zip(args, previous_states):
-            diff = get_top_level_diff(arg, previous_state)
+            diff = _get_top_level_diff(arg, previous_state)
             for key, attr in diff.items():
                 print(f"Attribute {key} of {str(arg)} changed"
                       f" from {str(getattr(previous_state, key))}"
