@@ -19,11 +19,12 @@ def se_print(func: Callable) -> Callable:
     def g(*args):
         previous_states = deepcopy(args)
         result = func(*args)
-        print(f"Call of {func.__name__} on args {str(args)}")
+        print(f"Call of {func.__name__} on args "
+              f"{tuple((str(arg) for arg in args))}:")
         for arg, previous_state in zip(args, previous_states):
             diff = _get_top_level_diff(arg, previous_state)
             for key, attr in diff.items():
-                print(f"Attribute {key} of {str(arg)} changed"
+                print(f"    Attribute {key} of {str(arg)} changed"
                       f" from {str(getattr(previous_state, key))}"
                       f" to {str(attr)}.")
         return result
