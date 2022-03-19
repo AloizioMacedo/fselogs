@@ -15,6 +15,7 @@ def get_top_level_diff(new: Any, old: Any) -> Dict[str, Any]:
 
 
 def se_print(func: Callable) -> Callable:
+    """Transforms the function to print its side-effects on the arguments."""
     def g(*args):
         previous_states = deepcopy(args)
         result = func(*args)
@@ -30,6 +31,7 @@ def se_print(func: Callable) -> Callable:
 
 
 def ret_print(func: Callable) -> Callable:
+    """Transforms the function to print its returned value."""
     def g(*args):
         result = func(*args)
         print(str(result))
