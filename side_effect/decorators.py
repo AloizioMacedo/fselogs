@@ -1,5 +1,10 @@
+import inspect
 from copy import deepcopy
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, List, Union
+
+
+def _get_arg_names(func: Callable) -> List[str]:
+    return inspect.getfullargspec(func)[0]
 
 
 def _has_eq_defined(obj: Any) -> bool:
@@ -23,24 +28,28 @@ def se_print(func: Callable) -> Callable:
     """Transforms the function to print its side-effects on the arguments."""
     def g(*args):
         previous_states = deepcopy(args)
+        arg_names = _get_arg_names(func)
+        gen = (f"{arg_name}: {previous_state}"
+               for arg_name, previous_state in zip(arg_names, previous_states))
         print(f"Call of {func.__qualname__} on args "
-              f"{tuple((str(arg) for arg in args))}:")
+              f"{tuple(gen)}:")
         result = func(*args)
         found = False
-        for arg, previous_state in zip(args, previous_states):
+        for arg, previous_state, arg_name in zip(args, previous_states,
+                                                 arg_names):
             if hasattr(arg, "__dict__"):
                 diff = _get_top_level_diff(arg, previous_state)
                 if not diff:
                     continue
                 for key, attr in diff.items():
-                    print(f"    Attribute {key} of {str(previous_state)}"
+                    print(f"    Attribute {key} of {str(arg_name)}"
                           " changed"
                           f" from {str(getattr(previous_state, key))}"
                           f" to {str(attr)}.")
                     found = True
             else:
                 if arg != previous_state:
-                    print(f"    Argument {str(previous_state)} changed"
+                    print(f"    Argument {str(arg_name)} changed"
                           f" from {str(previous_state)}"
                           f" to {str(arg)}.")
                     found = True
