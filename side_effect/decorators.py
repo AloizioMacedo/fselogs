@@ -23,7 +23,7 @@ def se_print(func: Callable) -> Callable:
     """Transforms the function to print its side-effects on the arguments."""
     def g(*args):
         previous_states = deepcopy(args)
-        print(f"Call of {func.__name__} on args "
+        print(f"Call of {func.__qualname__} on args "
               f"{tuple((str(arg) for arg in args))}:")
         result = func(*args)
         found = False
