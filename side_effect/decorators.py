@@ -42,6 +42,7 @@ def se_print(func: Callable) -> Callable:
                     print(f"    Argument {str(arg)} changed"
                           f" from {str(previous_state)}"
                           f" to {str(arg)}.")
+                    found = True
         if not found:
             print("    No side effects found.")
         return result
