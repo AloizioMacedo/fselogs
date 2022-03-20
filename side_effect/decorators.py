@@ -33,13 +33,14 @@ def se_print(func: Callable) -> Callable:
                 if not diff:
                     continue
                 for key, attr in diff.items():
-                    print(f"    Attribute {key} of {str(arg)} changed"
+                    print(f"    Attribute {key} of {str(previous_state)}"
+                          " changed"
                           f" from {str(getattr(previous_state, key))}"
                           f" to {str(attr)}.")
                     found = True
             else:
                 if arg != previous_state:
-                    print(f"    Argument {str(arg)} changed"
+                    print(f"    Argument {str(previous_state)} changed"
                           f" from {str(previous_state)}"
                           f" to {str(arg)}.")
                     found = True
