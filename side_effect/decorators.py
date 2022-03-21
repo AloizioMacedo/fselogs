@@ -25,7 +25,22 @@ def _get_top_level_diff(new: Any, old: Any) -> Dict[str, Any]:
 
 
 def se_print(func: Callable) -> Callable:
-    """Transforms the function to print its side-effects on the arguments."""
+    """Transforms the function to print its side effects on the arguments.
+
+    The changes are verified by means of '==' checks in the arguments and,
+    when an argument has attributes (in the sense of __dict__ being nonempty),
+    in the attributes of the argument instead.
+
+    Therefore, if some inner attributes of an argument are user-defined
+    classes, it is advised to declare the respective __eq__ methods
+    on such classes. If there are no __eq__ method explicitly defined
+    in such a user-defined class, this function will skip verifying if it
+    changed.
+
+    If the above behavior is confusing, avoid using this function when there
+    are arguments of the function func that are classes having attributes
+    which are not built-in types, or use deep_se_print instead.
+    """
     def g(*args):
         previous_states = deepcopy(args)
         arg_names = _get_arg_names(func)
