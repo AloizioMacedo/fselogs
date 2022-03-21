@@ -59,6 +59,56 @@ def se_print(func: Callable) -> Callable:
     return g
 
 
+def deep_se_print(func: Callable) -> Callable:
+    """Transforms the function to print nested side effects.
+
+    Searches recursively for changes on deep inner attributes of the arguments.
+
+    Goes down a tree until it finds some element which has no __dict__. For
+    each element of the tree, if it has no __dict__ or if __eq__ is
+    user-defined, it verifies equality (==/__eq__) with the previous state.
+    """
+    def g(*args):
+        previous_states = deepcopy(args)
+        arg_names = [str(previous_state) for previous_state in previous_states]
+        gen = (f"{previous_state}"
+               for previous_state in previous_states)
+        print(f"Call of {func.__qualname__} on args "
+              f"{tuple(gen)}:")
+        result = func(*args)
+        search_recursive(args, previous_states, arg_names)
+        return result
+
+    def search_recursive(args, previous_states, arg_names,
+                         tree: str = ""):
+        for arg, previous_state, arg_name in zip(args,
+                                                 previous_states, arg_names):
+            if (not hasattr(previous_state, "__dict__")
+                    or _has_eq_defined(previous_state)):
+                if arg != previous_state:
+                    print(f"    {str(arg_name)}{tree} changed"
+                          f" from {str(previous_state)}"
+                          f" to {str(arg)}.")
+            else:
+                tree = f" of {arg}" + tree
+                for key, attr in vars(arg).items():
+                    if not hasattr(attr, "__dict__"):
+                        if attr != getattr(previous_state, key):
+                            print(f"    {str(key)}{tree}"
+                                  f" changed"
+                                  f" from {str(getattr(previous_state, key))}"
+                                  f" to {str(attr)}.")
+                        continue
+                    search_recursive(tuple(vars(attr).values()),
+                                     tuple(
+                                        vars(getattr(previous_state,
+                                                     key)).values()
+                                        ),
+                                     vars(attr).keys(),
+                                     f" of {str(attr)}" + tree)
+    return g
+
+
 def ret_print(func: Callable) -> Callable:
     """Transforms the function to print its returned value."""
     def g(*args):
